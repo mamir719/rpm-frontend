@@ -1534,7 +1534,7 @@ const extractDashboardSlugFromPath = (pathname) => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           <StatCard
-            title="Total Patientsss"
+            title="Total Patients"
             value={totalPatients.toString()}
             change="Assigned to you"
             changeType="positive"
