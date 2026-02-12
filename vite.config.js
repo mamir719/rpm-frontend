@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss()],
     server: {
       port: 5174,
-      allowedHosts: ["api.twentytwohealth.com"], // ✅ important
+      allowedHosts: ["18.221.174.173"], // ✅ important
       // host: true,
     },
     // Use environment variable to determine base path
