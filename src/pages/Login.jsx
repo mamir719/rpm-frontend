@@ -13,7 +13,7 @@ import ThemeToggle from "../components/ThemeToggle";
 import { Eye, EyeOff } from "lucide-react";
 
 // const API_BASE =
-//   import.meta.env.VITE_BACKEND_API || "api.twentytwohealth.com/rpm-be";
+
 const API_BASE = import.meta.env.VITE_BACKEND_API || "http://localhost:4000";
 const Login = () => {
   const [identifier, setIdentifier] = useState("");

@@ -53,9 +53,8 @@
 // api.js
 import axios from "axios";
 
-// const API_BASE = import.meta.env.VITE_BACKEND_API || "http://localhost:4000";
 const API_BASE =
-  import.meta.env.VITE_BACKEND_API || "api.twentytwohealth.com/rpm-be";
+  import.meta.env.VITE_BACKEND_API || "http://localhost:4000";
 
 const api = axios.create({
   baseURL: API_BASE,

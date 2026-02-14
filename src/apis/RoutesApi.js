@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// const BASE = import.meta.env.VITE_BACKEND_API || "http://localhost:4000";
+
 const BASE =
-  import.meta.env.VITE_BACKEND_API || "api.twentytwohealth.com/rpm-be";
+  import.meta.env.VITE_BACKEND_API || "http://localhost:4000";
 
 const BASE_URL = `${BASE}/api/alerts`; // final: http://localhost:4000/api/alerts
 
