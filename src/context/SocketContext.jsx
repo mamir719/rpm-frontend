@@ -26,19 +26,26 @@ export const SocketProvider = ({ children }) => {
   };
 
   // Determine backend URL and path based on environment
+  // const getSocketConfig = () => {
+  //   if (import.meta.env.VITE_ENVIRONMENT === "production") {
+  //     return {
+  //       url: "api.twentytwohealth.com",
+  //       path: "/rpm-be/socket.io",
+  //     };
+  //   } else {
+  //     return {
+  //       url: "http://localhost:4000",
+  //       path: "/socket.io",
+  //     };
+  //   }
+  // };
+
   const getSocketConfig = () => {
-    if (import.meta.env.VITE_ENVIRONMENT === "production") {
-      return {
-        url: "http://18.221.174.173",
-        path: "/rpm-be/socket.io",
-      };
-    } else {
-      return {
-        url: "http://localhost:4000",
-        path: "/socket.io",
-      };
-    }
+  return {
+    url: import.meta.env.VITE_SOCKET_URL || "http://localhost:4000",
+    path: import.meta.env.VITE_SOCKET_PATH || "/socket.io",
   };
+};
 
   useEffect(() => {
     const config = getSocketConfig();
