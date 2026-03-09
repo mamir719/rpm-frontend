@@ -233,11 +233,13 @@ const AuthProvider = ({ children }) => {
         scheduleTokenRefresh();
 
         if (data.user.role === "admin") {
-          navigate("/admin");
+          navigate("/admin", { replace: true });
         } else if (data.user.role === "super-admin") {
-          navigate("/superAdmin");
+          navigate("/superAdmin", { replace: true });
+        } else if (data.user.role === "patient") {
+          navigate("/patient-dashboard", { replace: true });
         } else {
-          navigate("/dashboard");
+          navigate("/dashboard", { replace: true });
         }
       } else {
         console.error("❌ Login failed:", data.message);
@@ -266,12 +268,25 @@ const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error("❌ Server logout error:", error);
     } finally {
+      // 1. Clear session-specific hints from storage
+      try {
+        for (let i = sessionStorage.length - 1; i >= 0; i--) {
+          const key = sessionStorage.key(i);
+          if (key && (key.startsWith("infuzamed_") || key.toLowerCase().includes("patient"))) {
+            sessionStorage.removeItem(key);
+          }
+        }
+      } catch (e) {}
+
       setAuth({
         user: null,
         isAuthenticated: false,
         loading: false,
       });
-      navigate("/");
+
+      // 2. Navigate away and REPLACE history so user can't go 'back' into dashboard
+      navigate("/", { replace: true });
+      
       console.log("✅ Client logout complete");
     }
   };

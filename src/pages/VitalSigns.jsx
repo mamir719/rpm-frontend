@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Heart,
   Droplets,
@@ -14,28 +14,46 @@ import {
 import VitalSignCard from "../components/VitalSignCard";
 import BPChart from "../components/Chart";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { AuthContext } from "../context/AuthProvider";
 
 // const API_BASE = import.meta.env.VITE_BACKEND_API || "http://localhost:4000";
 const API_BASE =
   import.meta.env.VITE_BACKEND_API || "http://localhost:4000";
-const VitalSigns = () => {
+const VitalSigns = ({ idProp }) => {
+  const { auth } = useContext(AuthContext);
+  const isPatientRole = auth?.user?.role === "patient";
+
   const location = useLocation();
   const navigate = useNavigate();
-  const { patientId } = useParams();
+  const params = useParams();
+  const patientId = idProp || params.patientId;
 
   const [patientData, setPatientData] = useState(null);
   const [historicalData, setHistoricalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [historicalLoading, setHistoricalLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
-  const [deviceType, setDeviceType] = useState("bp");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (location.state?.activeTab) return location.state.activeTab;
+    try {
+      if (window && window.__vital_initial_tab) return window.__vital_initial_tab;
+    } catch (e) {}
+    return "overview";
+  });
+  const [deviceType, setDeviceType] = useState(() => {
+    if (location.state?.deviceType) return location.state.deviceType;
+    try {
+      if (window && window.__vital_device_type) return window.__vital_device_type;
+    } catch (e) {}
+    return "bp";
+  });
   const [daysFilter, setDaysFilter] = useState(30);
   const [currentPage, setCurrentPage] = useState(1);
   const [exporting, setExporting] = useState(false);
 
   // NEW: querying state for Query button activity indicator
   const [querying, setQuerying] = useState(false);
+  const [alertSettings, setAlertSettings] = useState(null);
 
   // Query Period UI state
   const [queryMode, setQueryMode] = useState("range");
@@ -82,59 +100,38 @@ const VitalSigns = () => {
     return `${yyyy}-${mmth}-${dd} ${hh}:${min}`;
   };
 
-  // Detect device type from navigation
+  // Handle state persistence and location state cleanup after mounting
   useEffect(() => {
-    console.log("=== useEffect - Device Type Detection ===");
+    console.log("=== VitalSigns: Initialization Persistence & Cleanup ===");
+    
+    let nameToPersist = null;
 
-    let detectedDeviceType = "bp";
-
+    // 1. Check window/state for patient name to persist
     try {
-      const windowDeviceType = window && window.__vital_device_type;
-      console.log("Window device type:", windowDeviceType);
-      if (windowDeviceType === "bp" || windowDeviceType === "spo2") {
-        detectedDeviceType = windowDeviceType;
-        try {
-          delete window.__vital_device_type;
-        } catch (err) {
-          window.__vital_device_type = undefined;
-        }
+      if (window.__vital_patient_name) {
+        nameToPersist = window.__vital_patient_name;
+        delete window.__vital_patient_name;
       }
-    } catch (err) {
-      console.error("Error checking window device type:", err);
+      if (window.__vital_device_type) delete window.__vital_device_type;
+      if (window.__vital_initial_tab) delete window.__vital_initial_tab;
+    } catch (e) {}
+
+    if (location.state?.patientName || location.state?.breadcrumbName) {
+      nameToPersist = location.state.patientName || location.state.breadcrumbName;
     }
 
-    // If navigation state included a deviceType, use it.
-    if (location && location.state && location.state.deviceType) {
-      const stateDeviceType = location.state.deviceType;
-      console.log("Location state device type:", stateDeviceType);
-      if (stateDeviceType === "bp" || stateDeviceType === "spo2") {
-        detectedDeviceType = stateDeviceType;
-
-        // preserve patientName/breadcrumbName if present before replacing state
-        const preservedName =
-          location.state?.patientName || location.state?.breadcrumbName;
-
-        if (preservedName && patientId) {
-          // persist to sessionStorage as well
-          persistPatientNameToSession(patientId, preservedName);
-        }
-
-        // Replace state to prevent repeated triggers, but preserve patientName if we have it.
-        const newState = preservedName
-          ? { ...(location.state || {}), patientName: preservedName }
-          : { ...(location.state || {}) };
-
-        // clear deviceType from state (we've consumed it), but keep patientName
-        if (newState.deviceType) delete newState.deviceType;
-
-        navigate(location.pathname, { replace: true, state: newState });
-      }
+    if (nameToPersist && patientId) {
+      persistPatientNameToSession(patientId, nameToPersist);
     }
 
-    console.log("Final detected device type:", detectedDeviceType);
-    setDeviceType(detectedDeviceType);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]); // only needs location to detect incoming deviceType
+    // 2. Consume location state params (prevent re-injection on refresh/back)
+    if (location.state && (location.state.deviceType || location.state.activeTab)) {
+      console.log("Consuming location state params...");
+      const preservedName = nameToPersist || (patientData?.patient?.name ?? null);
+      const newState = preservedName ? { patientName: preservedName } : {};
+      navigate(location.pathname, { replace: true, state: newState });
+    }
+  }, [location, patientId, navigate, patientData]); // Only depends on location/identity changes
 
   useEffect(() => {
     if (!patientId) {
@@ -145,65 +142,27 @@ const VitalSigns = () => {
     console.log("Patient ID from URL:", patientId);
     console.log("Device type:", deviceType);
     loadPatientData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId, deviceType]);
 
-  useEffect(() => {
-    console.log("=== useEffect - Window Tab Check ===");
+  const fetchAlertSettings = async () => {
     try {
-      const wtab = window && window.__vital_initial_tab;
-      console.log("Window tab value:", wtab);
-      if (wtab === "overview" || wtab === "history") {
-        setActiveTab(wtab);
-
-        // if a name was put on window scope earlier, persist it
-        try {
-          if (window.__vital_patient_name && patientId) {
-            persistPatientNameToSession(patientId, window.__vital_patient_name);
-          }
-        } catch (err) {}
-
-        // preserve patientName in state (if any) when replacing state
-        const preservedName =
-          (location &&
-            location.state &&
-            (location.state.patientName || location.state.breadcrumbName)) ||
-          (patientData && patientData.patient && patientData.patient.name);
-
-        const newState = preservedName ? { patientName: preservedName } : {};
-        navigate(location.pathname, { replace: true, state: newState });
-        return;
+      const res = await fetch(`${API_BASE}/api/patient/alert-settings`, {
+        credentials: "include",
+      });
+      const json = await res.json();
+      if (json.success) {
+        setAlertSettings(json.settings);
       }
     } catch (err) {
-      console.error("Error checking window tab:", err);
+      console.error("Error fetching alert settings:", err);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // run on mount
+  };
 
   useEffect(() => {
-    console.log("=== useEffect - Location State Check ===");
-    if (location && location.state && location.state.activeTab) {
-      const tab = location.state.activeTab;
-      console.log("Location state tab:", tab);
-      if (tab === "overview" || tab === "history") {
-        setActiveTab(tab);
-
-        // Persist patientName if present
-        const preservedName =
-          location.state.patientName ||
-          location.state.breadcrumbName ||
-          (patientData?.patient?.name ?? null);
-        if (preservedName && patientId) {
-          persistPatientNameToSession(patientId, preservedName);
-        }
-
-        // Replace state but keep patientName so Navbar can use it
-        const newState = preservedName ? { patientName: preservedName } : {};
-        navigate(location.pathname, { replace: true, state: newState });
-      }
+    if (isPatientRole) {
+      fetchAlertSettings();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]); // run when location changes
+  }, [isPatientRole]);
 
   const loadPatientData = async () => {
     console.log("=== loadPatientData() called ===");
@@ -217,8 +176,12 @@ const VitalSigns = () => {
 
     setLoading(true);
     try {
+      const endpoint = isPatientRole 
+        ? `/api/patient/patients/${patientId}/vital-signs`
+        : `/api/doctor/patients/${patientId}/vital-signs`;
+
       const response = await fetch(
-        `${API_BASE}/api/doctor/patients/${patientId}/vital-signs`,
+        `${API_BASE}${endpoint}`,
         {
           method: "GET",
           credentials: "include",
@@ -323,6 +286,23 @@ const VitalSigns = () => {
     return "normal";
   };
 
+  const getBPStatus = (sys, dia) => {
+    if (sys === "--" || dia === "--") return "no-data";
+    const s = parseInt(sys);
+    const d = parseInt(dia);
+
+    const thresholds = alertSettings || {
+      systolic_high: 140,
+      systolic_low: 90,
+      diastolic_high: 90,
+      diastolic_low: 60,
+    };
+
+    if (s > thresholds.systolic_high || d > thresholds.diastolic_high) return "critical";
+    if (s < thresholds.systolic_low || d < thresholds.diastolic_low) return "warning";
+    return "normal";
+  };
+
   const getSpo2Status = (spo2) => {
     if (!spo2 || spo2 === "--") return "no-data";
     const spo2Value = parseFloat(spo2);
@@ -368,8 +348,12 @@ const VitalSigns = () => {
 
     setHistoricalLoading(true);
     try {
+      const endpoint = isPatientRole 
+        ? `/api/patient/patients/${targetPatientId}/device-data`
+        : `/api/doctor/patients/${targetPatientId}/device-data`;
+
       const response = await fetch(
-        `${API_BASE}/api/doctor/patients/${targetPatientId}/device-data?deviceType=${deviceType}&days=${days}&page=${page}&limit=10`,
+        `${API_BASE}${endpoint}?deviceType=${deviceType}&days=${days}&page=${page}&limit=10`,
         {
           method: "GET",
           credentials: "include",
@@ -407,8 +391,12 @@ const VitalSigns = () => {
 
     setRefreshing(true);
     try {
+      const endpoint = isPatientRole 
+        ? `/api/patient/patients/${patientId}/vital-signs`
+        : `/api/doctor/patients/${patientId}/vital-signs`;
+
       const response = await fetch(
-        `${API_BASE}/api/doctor/patients/${patientId}/vital-signs`,
+        `${API_BASE}${endpoint}`,
         {
           method: "GET",
           credentials: "include",

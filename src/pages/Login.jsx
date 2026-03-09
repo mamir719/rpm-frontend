@@ -34,6 +34,7 @@ const Login = () => {
       const userRole = auth.user?.role;
       if (userRole === "admin") navigate("admin", { replace: true });
       else if (userRole === "super-admin") navigate("superAdmin", { replace: true });
+      else if (userRole === "patient") navigate("patient-dashboard", { replace: true });
       else navigate("dashboard", { replace: true });
     }
   }, [auth.isAuthenticated, auth.user, navigate]);
@@ -98,6 +99,7 @@ const Login = () => {
     if (role === "admin") navigate("admin", { replace: true });
     else if (role === "clinician") navigate("dashboard", { replace: true });
     else if (role === "super-admin") navigate("superAdmin", { replace: true });
+    else if (role === "patient") navigate("patient-dashboard", { replace: true });
     else setError("Access Denied. Unauthorized role.");
   };
 
@@ -111,9 +113,10 @@ const Login = () => {
         { withCredentials: true }
       );
 
-      if (response.status === 200 && response.data.user)
+      if (response.status === 200 && response.data.user) {
+        // Ensure we replace history when moving from OTP to dashboard
         navigateBasedOnRole(response.data.user.role);
-      else setError("Invalid OTP");
+      } else setError("Invalid OTP");
     } catch (err) {
       setError("OTP verification failed");
     } finally {

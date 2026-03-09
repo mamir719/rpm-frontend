@@ -85,6 +85,9 @@ import AdminUsers from "./layouts/AdminLayout";
 import SuperAdminLayout from "./layouts/SuperAdminLayout"; // Correct import
 import PatientModal from "./pages/PatientModal";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import PatientLayout from "./layouts/PatientLayout";
+import PatientDashboard from "./pages/PatientDashboard";
+import PatientChat from "./pages/PatientChat";
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState("dashboard");
@@ -143,6 +146,16 @@ const App = () => {
       </Route>
 
       <Route path="/superAdmin" element={<SuperAdminLayout />} />
+
+      {/* Patient Routes */}
+      <Route path="/" element={<PatientLayout />}>
+        <Route path="patient-dashboard" element={<PatientDashboard />} />
+        <Route
+          path="patient-dashboard/vital-signs/:patientId"
+          element={<VitalSigns />}
+        />
+        <Route path="patient-chat" element={<PatientChat />} />
+      </Route>
     </Routes>
   );
 };

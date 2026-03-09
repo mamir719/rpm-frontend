@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthProvider";
 import {
   Users,
   Activity,
@@ -27,7 +29,6 @@ import PatientCommunication from "../pages/PatientCommunication";
 import DeviceManagement from "../pages/DeviceManagement";
 import SettingsPage from "../pages/Settings";
 import AlertNotification from "../components/AlertNotification";
-import { useLocation } from "react-router-dom";
 import { useSocket } from "../context/SocketContext";
 
 const UserLayout = () => {
@@ -36,6 +37,10 @@ const UserLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isConnected, socket, newAlert, getConnectionStatus } = useSocket();
   const connectionStatus = getConnectionStatus();
+  const { auth } = useAuth();
+  
+  if (!auth?.isAuthenticated && !auth?.loading) return <Navigate to="/" replace />;
+  if (auth?.user?.role === "patient") return <Navigate to="/patient-dashboard" replace />;
   // In UserLayout.jsx, add this useEffect:
   useEffect(() => {
     if (socket && isConnected) {
