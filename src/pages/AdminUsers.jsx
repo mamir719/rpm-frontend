@@ -19,6 +19,52 @@ import AddUserModal from "../components/AddUserModal";
 import EditUserModal from "../components/EditUserModal";
 import ResetPasswordModal from "../components/ResetPasswordModal";
 import DeleteUserModal from "../components/DeleteUserModal";
+import { X } from "lucide-react";
+
+const ViewPatientsModal = ({ isOpen, onClose, clinician }) => {
+  if (!isOpen || !clinician) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Assigned Patients: {clinician.name}
+          </h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-4 max-h-[60vh] overflow-y-auto">
+          {clinician.assignedPatients && clinician.assignedPatients.length > 0 ? (
+            <ul className="divide-y divide-gray-100">
+              {clinician.assignedPatients.map((patient, index) => (
+                <li key={index} className="py-3 flex items-center">
+                  <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 text-sm font-medium">
+                    {patient.charAt(0)}
+                  </div>
+                  <span className="text-sm text-gray-700">{patient}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              No patients assigned to this clinician yet.
+            </div>
+          )}
+        </div>
+        <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([
@@ -33,6 +79,8 @@ const AdminUsers = () => {
       lastLogin: "2024-08-18 09:30 AM",
       createdAt: "2024-01-15",
       avatar: "JS",
+      patientCount: 3,
+      assignedPatients: ["Amir Khan", "Zain Ahmed", "Talha Mehmood"],
     },
     {
       id: 2,
@@ -45,6 +93,8 @@ const AdminUsers = () => {
       lastLogin: "2024-08-18 08:45 AM",
       createdAt: "2024-02-20",
       avatar: "MG",
+      patientCount: 2,
+      assignedPatients: ["Sarah Jenkins", "Robert Dow"],
     },
     {
       id: 3,
@@ -57,6 +107,8 @@ const AdminUsers = () => {
       lastLogin: "2024-08-15 03:20 PM",
       createdAt: "2024-01-10",
       avatar: "RJ",
+      patientCount: 1,
+      assignedPatients: ["Michael Scott"],
     },
     {
       id: 4,
@@ -82,6 +134,18 @@ const AdminUsers = () => {
       createdAt: "2024-03-01",
       avatar: "MB",
     },
+    {
+      id: 6,
+      name: "Amir Khan",
+      email: "amir@example.com",
+      phone: "+1 (555) 678-9012",
+      role: "Patient",
+      status: "Active",
+      lastLogin: "2024-08-18 02:00 PM",
+      createdAt: "2024-05-10",
+      avatar: "AK",
+      assignedClinician: "Dr. John Smith",
+    },
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -93,6 +157,8 @@ const AdminUsers = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [showViewPatientsModal, setShowViewPatientsModal] = useState(false);
+  const [selectedClinician, setSelectedClinician] = useState(null);
 
   // Filter users based on search and filters
   const filteredUsers = users.filter((user) => {
@@ -101,7 +167,12 @@ const AdminUsers = () => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.department.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesRole = selectedRole === "All" || user.role === selectedRole;
+    const matchesRole =
+      selectedRole === "All" ||
+      (selectedRole === "Clinician" && (user.role === "Doctor" || user.role === "Nurse" || user.role === "clinician")) ||
+      (selectedRole === "Patient" && (user.role === "Patient" || user.role === "patient")) ||
+      user.role === selectedRole;
+
     const matchesStatus =
       selectedStatus === "All" || user.status === selectedStatus;
 
@@ -232,6 +303,26 @@ const AdminUsers = () => {
         </div>
       </div>
 
+      {/* Tab Switcher */}
+      <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-700 mb-6">
+        {["All", "Clinician", "Patient"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => {
+              setSelectedRole(tab);
+              // Reset other filters if needed
+            }}
+            className={`px-6 py-2 text-sm font-medium transition-colors border-b-2 ${
+              selectedRole === tab
+                ? "border-primary text-primary"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }`}
+          >
+            {tab === "Clinician" ? "Clinicians" : tab === "Patient" ? "Patients" : "All Users"}
+          </button>
+        ))}
+      </div>
+
       {/* Filters and Search */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
@@ -250,20 +341,8 @@ const AdminUsers = () => {
             />
           </div>
 
-          {/* Filters */}
+          {/* Additional Filters */}
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-            <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-              <option value="All">All Roles</option>
-              <option value="Doctor">Doctors</option>
-              <option value="Nurse">Nurses</option>
-              <option value="Admin">Admins</option>
-              <option value="Technician">Technicians</option>
-            </select>
-
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
@@ -279,9 +358,9 @@ const AdminUsers = () => {
 
       {/* Users Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900">
-            Users ({filteredUsers.length})
+            {selectedRole === "All" ? "All Users" : selectedRole === "Clinician" ? "Clinicians" : "Patients"} ({filteredUsers.length})
           </h3>
         </div>
 
@@ -293,16 +372,28 @@ const AdminUsers = () => {
                   User
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role & Department
+                  Role
                 </th>
+                {selectedRole === "Clinician" && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Assigned Patients
+                  </th>
+                )}
+                {selectedRole === "Patient" && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Assigned Clinician
+                  </th>
+                )}
+                {selectedRole === "All" && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Assignments
+                  </th>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Contact
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Login
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -315,7 +406,7 @@ const AdminUsers = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
-                        {user.avatar}
+                        {user.avatar || user.name.charAt(0)}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
@@ -329,19 +420,54 @@ const AdminUsers = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{user.role}</div>
-                    <div className="text-sm text-gray-500">
-                      {user.department}
-                    </div>
+                    {user.department && <div className="text-sm text-gray-500">{user.department}</div>}
                   </td>
+                  {selectedRole === "Clinician" && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => {
+                          setSelectedClinician(user);
+                          setShowViewPatientsModal(true);
+                        }}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                      >
+                        {user.patientCount || 0} Patients
+                      </button>
+                    </td>
+                  )}
+                  {selectedRole === "Patient" && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-900">
+                        {user.assignedClinician || "Unassigned"}
+                      </span>
+                    </td>
+                  )}
+                  {selectedRole === "All" && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {user.role === "Patient" || user.role === "patient" ? (
+                        <span className="text-xs text-gray-500">
+                          Clinician: {user.assignedClinician || "None"}
+                        </span>
+                      ) : (user.role === "Doctor" || user.role === "Nurse" || user.role === "clinician") ? (
+                        <span className="text-xs text-gray-500">
+                          Patients: {user.patientCount || 0}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
+                    </td>
+                  )}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-900 mb-1">
                       <Mail size={14} className="mr-1" />
                       {user.email}
                     </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Phone size={14} className="mr-1" />
-                      {user.phone}
-                    </div>
+                    {user.phone && (
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Phone size={14} className="mr-1" />
+                        {user.phone}
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -353,9 +479,6 @@ const AdminUsers = () => {
                     >
                       {user.status}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.lastLogin}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="relative">
@@ -491,6 +614,17 @@ const AdminUsers = () => {
           }}
           user={selectedUser}
           onConfirm={handleDeleteUser}
+        />
+      )}
+
+      {showViewPatientsModal && selectedClinician && (
+        <ViewPatientsModal
+          isOpen={showViewPatientsModal}
+          onClose={() => {
+            setShowViewPatientsModal(false);
+            setSelectedClinician(null);
+          }}
+          clinician={selectedClinician}
         />
       )}
 

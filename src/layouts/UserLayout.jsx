@@ -41,6 +41,8 @@ const UserLayout = () => {
   
   if (!auth?.isAuthenticated && !auth?.loading) return <Navigate to="/" replace />;
   if (auth?.user?.role === "patient") return <Navigate to="/patient-dashboard" replace />;
+  if (auth?.user?.role === "admin") return <Navigate to="/admin" replace />;
+  if (auth?.user?.role === "super-admin") return <Navigate to="/superAdmin" replace />;
   // In UserLayout.jsx, add this useEffect:
   useEffect(() => {
     if (socket && isConnected) {

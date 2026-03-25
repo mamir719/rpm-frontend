@@ -10,7 +10,11 @@ const PatientLayout = () => {
   const { auth } = useAuth();
 
   if (!auth?.isAuthenticated && !auth?.loading) return <Navigate to="/" replace />;
-  if (auth?.user?.role && auth.user.role !== "patient") return <Navigate to="/dashboard" replace />;
+  if (auth?.user?.role && auth.user.role !== "patient") {
+    if (auth.user.role === "admin") return <Navigate to="/admin" replace />;
+    if (auth.user.role === "super-admin") return <Navigate to="/superAdmin" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans transition-colors">

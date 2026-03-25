@@ -120,7 +120,7 @@ const PatientModal = ({
         const parsed = JSON.parse(cached);
         if (parsed && !patientProfile) setPatientProfile(parsed);
       }
-    } catch {}
+    } catch { }
 
     (async () => {
       const candidatePaths = [
@@ -174,8 +174,8 @@ const PatientModal = ({
             `patientProfile_byId_${id}`,
             JSON.stringify(fetched)
           );
-        } catch {}
-      } catch {}
+        } catch { }
+      } catch { }
 
       // Dispatch same event Dashboard listens to so the app gets full patient object
       try {
@@ -247,13 +247,12 @@ const PatientModal = ({
       // Create new PDF document
       const doc = new jsPDF();
       doc.setProperties({
-        title: "22 RPM",
+        title: "Vita RPM",
       });
       // Set document properties
       doc.setProperties({
-        title: `${deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Report - ${
-          patientData.patient.name
-        }`,
+        title: `${deviceType === "bp" ? "Blood Pressure" : "SpO2"} Report - ${patientData.patient.name
+          }`,
         subject: "Patient Vital Signs Report",
         author: "RPM System",
       });
@@ -262,13 +261,13 @@ const PatientModal = ({
       doc.setFontSize(18);
       doc.setTextColor(40, 40, 40);
       doc.setFont(undefined, "bold");
-      doc.text("22 RPM", 105, 15, { align: "center" });
+      doc.text("Vita RPM", 105, 15, { align: "center" });
 
       // Add report type subtitle
       doc.setFontSize(14);
       doc.setFont(undefined, "normal");
       doc.text(
-        `${deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Monitoring Report`,
+        `${deviceType === "bp" ? "Blood Pressure" : "SpO2"} Monitoring Report`,
         105,
         25,
         { align: "center" }
@@ -315,7 +314,7 @@ const PatientModal = ({
       } else {
         columns = [
           { header: "Date & Time", width: 50, key: "datetime" }, // Increased from 38 to 50
-          { header: "SpO₂", width: 16, key: "spo2" }, // Reduced from 18 to 16
+          { header: "SpO2", width: 16, key: "spo2" }, // Reduced from 18 to 16
           { header: "Pulse", width: 16, key: "pulse" }, // Reduced from 18 to 16
           { header: "PI", width: 12, key: "pi" }, // Reduced from 15 to 12
           { header: "Status", width: 20, key: "status" }, // Reduced from 22 to 20
@@ -405,50 +404,50 @@ const PatientModal = ({
         const rowData =
           deviceType === "bp"
             ? [
-                // Use shorter date format that fits better
-                new Date(record.created_at).toLocaleDateString("en-GB") +
-                  " " +
-                  new Date(record.created_at).toLocaleTimeString("en-GB", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                  }),
-                `${record.systolic || "--"}/${record.diastolic || "--"}`,
-                `${record.pulse || "--"} bpm`,
-                record.bpStatus || "Normal",
-                getDeviceName(record),
-              ]
+              // Use shorter date format that fits better
+              new Date(record.created_at).toLocaleDateString("en-GB") +
+              " " +
+              new Date(record.created_at).toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              }),
+              `${record.systolic || "--"}/${record.diastolic || "--"}`,
+              `${record.pulse || "--"} bpm`,
+              record.bpStatus || "Normal",
+              getDeviceName(record),
+            ]
             : (() => {
-                const recordData =
-                  typeof record.data === "string"
-                    ? JSON.parse(record.data)
-                    : record.data;
-                const getSpo2Status = (spo2) => {
-                  if (!spo2 || spo2 === "--") return "No Data";
-                  const spo2Value = parseFloat(spo2);
-                  if (spo2Value < 90) return "Critical";
-                  if (spo2Value < 95) return "Warning";
-                  return "Normal";
-                };
-                const spo2Status = getSpo2Status(recordData.spo2);
+              const recordData =
+                typeof record.data === "string"
+                  ? JSON.parse(record.data)
+                  : record.data;
+              const getSpo2Status = (spo2) => {
+                if (!spo2 || spo2 === "--") return "No Data";
+                const spo2Value = parseFloat(spo2);
+                if (spo2Value < 90) return "Critical";
+                if (spo2Value < 95) return "Warning";
+                return "Normal";
+              };
+              const spo2Status = getSpo2Status(recordData.spo2);
 
-                return [
-                  new Date(record.created_at).toLocaleDateString("en-GB") +
-                    " " +
-                    new Date(record.created_at).toLocaleTimeString("en-GB", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    }),
-                  `${recordData.spo2 || "--"}%`,
-                  recordData.pulse
-                    ? `${Math.round(recordData.pulse)} bpm`
-                    : "N/A",
-                  recordData.pi || "N/A",
-                  spo2Status,
-                  getDeviceName(record),
-                ];
-              })();
+              return [
+                new Date(record.created_at).toLocaleDateString("en-GB") +
+                " " +
+                new Date(record.created_at).toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                }),
+                `${recordData.spo2 || "--"}%`,
+                recordData.pulse
+                  ? `${Math.round(recordData.pulse)} bpm`
+                  : "N/A",
+                recordData.pi || "N/A",
+                spo2Status,
+                getDeviceName(record),
+              ];
+            })();
 
         // Draw row with borders
         currentX = margin;
@@ -507,17 +506,13 @@ const PatientModal = ({
 
         if (deviceType === "bp") {
           const stats = [
-            `Average BP: ${historicalData.statistics.averageSystolic || "--"}/${
-              historicalData.statistics.averageDiastolic || "--"
+            `Average BP: ${historicalData.statistics.averageSystolic || "--"}/${historicalData.statistics.averageDiastolic || "--"
             }`,
-            `Highest BP: ${historicalData.statistics.highestSystolic || "--"}/${
-              historicalData.statistics.highestDiastolic || "--"
+            `Highest BP: ${historicalData.statistics.highestSystolic || "--"}/${historicalData.statistics.highestDiastolic || "--"
             }`,
-            `Lowest BP: ${historicalData.statistics.lowestSystolic || "--"}/${
-              historicalData.statistics.lowestDiastolic || "--"
+            `Lowest BP: ${historicalData.statistics.lowestSystolic || "--"}/${historicalData.statistics.lowestDiastolic || "--"
             }`,
-            `Average Pulse: ${
-              historicalData.statistics.averagePulse || "--"
+            `Average Pulse: ${historicalData.statistics.averagePulse || "--"
             } bpm`,
             `Total Readings: ${historicalData.statistics.totalReadings || "0"}`,
           ];
@@ -528,11 +523,10 @@ const PatientModal = ({
           });
         } else {
           const stats = [
-            `Average SpO₂: ${historicalData.statistics.averageSpo2 || "--"}%`,
-            `Highest SpO₂: ${historicalData.statistics.highestSpo2 || "--"}%`,
-            `Lowest SpO₂: ${historicalData.statistics.lowestSpo2 || "--"}%`,
-            `Average Pulse: ${
-              historicalData.statistics.averagePulse || "--"
+            `Average SpO2: ${historicalData.statistics.averageSpo2 || "--"}%`,
+            `Highest SpO2: ${historicalData.statistics.highestSpo2 || "--"}%`,
+            `Lowest SpO2: ${historicalData.statistics.lowestSpo2 || "--"}%`,
+            `Average Pulse: ${historicalData.statistics.averagePulse || "--"
             } bpm`,
             `Total Readings: ${historicalData.statistics.totalReadings || "0"}`,
           ];
@@ -555,9 +549,8 @@ const PatientModal = ({
       }
 
       // Save the PDF
-      const fileName = `${patientData.patient.name.replace(/\s+/g, "_")}_${
-        deviceType === "bp" ? "BP" : "SpO2"
-      }_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+      const fileName = `${patientData.patient.name.replace(/\s+/g, "_")}_${deviceType === "bp" ? "BP" : "SpO2"
+        }_Report_${new Date().toISOString().split("T")[0]}.pdf`;
       doc.save(fileName);
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -618,9 +611,8 @@ const PatientModal = ({
               },
               bloodPressure: {
                 value: realTimeData?.latestBP
-                  ? `${realTimeData.latestBP?.data?.systolic || "--"}/${
-                      realTimeData.latestBP?.data?.diastolic || "--"
-                    }`
+                  ? `${realTimeData.latestBP?.data?.systolic || "--"}/${realTimeData.latestBP?.data?.diastolic || "--"
+                  }`
                   : "--",
                 unit: "mmHg",
                 status: realTimeData?.latestBP?.data?.bpStatus || "normal",
@@ -738,7 +730,7 @@ const PatientModal = ({
           }
           return;
         }
-      } catch (err) {}
+      } catch (err) { }
 
       if (loc && loc.state && loc.state.activeTab) {
         const tab = loc.state.activeTab;
@@ -1065,8 +1057,8 @@ const PatientModal = ({
               {historicalData?.pagination?.totalRecords
                 ? `${historicalData.pagination.totalRecords} records found`
                 : historicalData?.data?.length
-                ? `${historicalData.data.length} records found`
-                : "No records found"}
+                  ? `${historicalData.data.length} records found`
+                  : "No records found"}
             </div>
             <div className="flex items-center space-x-3">
               <button
@@ -1382,21 +1374,21 @@ const PatientModal = ({
               <div className="bg-white dark:bg-innerDarkColor rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <h3 className="text-lg font-medium text-primary dark:text-darkModeText">
-                    SpO₂ Readings
+                    SpO2 Readings
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     {historicalData?.pagination
                       ? `Page ${currentPage} of ${historicalData.pagination.totalPages}`
                       : historicalLoading
-                      ? "Loading..."
-                      : "No data available"}
+                        ? "Loading..."
+                        : "No data available"}
                   </p>
                 </div>
                 <div className="p-6">
                   {historicalLoading ? (
                     <div className="flex justify-center py-8">
                       <div className="text-lg text-gray-600 dark:text-gray-400">
-                        Loading SpO₂ data...
+                        Loading SpO2 data...
                       </div>
                     </div>
                   ) : historicalData?.data && historicalData.data.length > 0 ? (
@@ -1409,7 +1401,7 @@ const PatientModal = ({
                                 Date & Time
                               </th>
                               <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                SpO₂
+                                SpO2
                               </th>
                               <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Pulse
@@ -1456,18 +1448,17 @@ const PatientModal = ({
                                         {recordData.spo2}%
                                       </span>
                                       <span
-                                        className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                                          getSpo2Status(recordData.spo2) ===
+                                        className={`ml-2 px-2 py-1 text-xs rounded-full ${getSpo2Status(recordData.spo2) ===
                                           "normal"
-                                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                            : getSpo2Status(recordData.spo2) ===
-                                              "warning"
+                                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                          : getSpo2Status(recordData.spo2) ===
+                                            "warning"
                                             ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                                             : getSpo2Status(recordData.spo2) ===
                                               "critical"
-                                            ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                                            : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
-                                        }`}
+                                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                                              : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                                          }`}
                                       >
                                         {getSpo2Status(recordData.spo2)}
                                       </span>
@@ -1553,7 +1544,7 @@ const PatientModal = ({
                     </>
                   ) : (
                     <div className="text-center py-8 text-gray-600 dark:text-gray-400">
-                      No SpO₂ data found for the selected period.
+                      No SpO2 data found for the selected period.
                     </div>
                   )}
                 </div>
@@ -1583,7 +1574,7 @@ const PatientModal = ({
         <div className="bg-white dark:bg-innerDarkColor rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-medium text-primary dark:text-darkModeText">
-              {deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Statistics (
+              {deviceType === "bp" ? "Blood Pressure" : "SpO2"} Statistics (
               {daysFilter} Days)
             </h3>
           </div>
@@ -1642,7 +1633,7 @@ const PatientModal = ({
                       {historicalData.statistics.averageSpo2}%
                     </div>
                     <div className="text-sm text-blue-600 dark:text-blue-400">
-                      Average SpO₂
+                      Average SpO2
                     </div>
                   </div>
                   <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
@@ -1650,7 +1641,7 @@ const PatientModal = ({
                       {historicalData.statistics.highestSpo2}%
                     </div>
                     <div className="text-sm text-red-600 dark:text-red-400">
-                      Highest SpO₂
+                      Highest SpO2
                     </div>
                   </div>
                   <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -1658,7 +1649,7 @@ const PatientModal = ({
                       {historicalData.statistics.lowestSpo2}%
                     </div>
                     <div className="text-sm text-green-600 dark:text-green-400">
-                      Lowest SpO₂
+                      Lowest SpO2
                     </div>
                   </div>
                   <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
@@ -1690,7 +1681,7 @@ const PatientModal = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <h2 className="text-2xl font-bold text-primary dark:text-white">
-              {deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Monitoring
+              {deviceType === "bp" ? "Blood Pressure" : "SpO2"} Monitoring
             </h2>
           </div>
 
@@ -1741,11 +1732,10 @@ const PatientModal = ({
               <>
                 <button
                   onClick={() => setActiveTab("overview")}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === "overview"
-                      ? "border-primary text-primary dark:text-darkModeText"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "overview"
+                    ? "border-primary text-primary dark:text-darkModeText"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
                 >
                   <div className="flex items-center space-x-2">
                     <Activity size={16} />
@@ -1754,11 +1744,10 @@ const PatientModal = ({
                 </button>
                 <button
                   onClick={() => setActiveTab("history")}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === "history"
-                      ? "border-primary text-primary dark:text-darkModeText"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "history"
+                    ? "border-primary text-primary dark:text-darkModeText"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
                 >
                   <div className="flex items-center space-x-2">
                     <BarChart3 size={16} />
@@ -1786,7 +1775,7 @@ const PatientModal = ({
               <div className="bg-white dark:bg-innerDarkColor rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <h3 className="text-lg font-medium text-primary dark:text-darkModeText">
-                    {deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Trends
+                    {deviceType === "bp" ? "Blood Pressure" : "SpO2"} Trends
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Showing {historicalData.data.length} readings from the last{" "}
@@ -1829,7 +1818,7 @@ const PatientModal = ({
       if (selectedPatient?.name) {
         try {
           window.__vital_patient_name = selectedPatient.name;
-        } catch {}
+        } catch { }
       }
     } catch (err) {
       console.error("Error storing patient data:", err);
@@ -1891,8 +1880,8 @@ const PatientModal = ({
           `patientProfile_byId_${patientId}`,
           JSON.stringify(selectedPatient)
         );
-      } catch {}
-    } catch {}
+      } catch { }
+    } catch { }
     routerNavigate(
       `/dashboard/${encodeURIComponent(
         String(currentSlug).trim().toLowerCase().replace(/\s+/g, "-")
@@ -1996,7 +1985,7 @@ const PatientModal = ({
               ← Back to Patient
             </button>
             <div className="text-sm text-gray-700 dark:text-gray-300 font-semibold">
-              Viewing {embeddedDeviceType === "bp" ? "Blood Pressure" : "SpO₂"}{" "}
+              Viewing {embeddedDeviceType === "bp" ? "Blood Pressure" : "SpO2"}{" "}
               Vital Signs
             </div>
           </div>
@@ -2121,15 +2110,15 @@ const PatientModal = ({
                       </p>
                       <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
                         {selectedPatient.created_at ||
-                        patientProfile?.created_at
+                          patientProfile?.created_at
                           ? new Date(
-                              selectedPatient.created_at ||
-                                patientProfile?.created_at
-                            ).toLocaleDateString("en-US", {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                            })
+                            selectedPatient.created_at ||
+                            patientProfile?.created_at
+                          ).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })
                           : "N/A"}
                       </p>
                     </div>
@@ -2141,7 +2130,7 @@ const PatientModal = ({
                       <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
                         {formatDate(
                           selectedPatient.last_login ||
-                            patientProfile?.last_login
+                          patientProfile?.last_login
                         )}
                       </p>
                     </div>
@@ -2251,8 +2240,8 @@ const PatientModal = ({
                   <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
                     {realTimeData?.latestBP?.created_at
                       ? `Last: ${new Date(
-                          realTimeData.latestBP.created_at
-                        ).toLocaleString()}`
+                        realTimeData.latestBP.created_at
+                      ).toLocaleString()}`
                       : "No data available"}
                   </span>
                 </div>
@@ -2279,32 +2268,29 @@ const PatientModal = ({
                           </div>
                         </div>
                         <div
-                          className={`rounded-lg p-3 ${
-                            realTimeData.latestBP.data.deviceInfo
-                              ?.batteryLevel <= 20
-                              ? "bg-red-100 dark:bg-red-900/30"
-                              : "bg-green-50 dark:bg-green-900/20"
-                          }`}
+                          className={`rounded-lg p-3 ${realTimeData.latestBP.data.deviceInfo
+                            ?.batteryLevel <= 20
+                            ? "bg-red-100 dark:bg-red-900/30"
+                            : "bg-green-50 dark:bg-green-900/20"
+                            }`}
                         >
                           <div
-                            className={`text-2xl font-bold ${
-                              realTimeData.latestBP.data.deviceInfo
-                                ?.batteryLevel <= 20
-                                ? "text-red-600 dark:text-red-400"
-                                : "text-green-600 dark:text-green-400"
-                            }`}
+                            className={`text-2xl font-bold ${realTimeData.latestBP.data.deviceInfo
+                              ?.batteryLevel <= 20
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-green-600 dark:text-green-400"
+                              }`}
                           >
                             {realTimeData.latestBP.data.deviceInfo
                               ?.batteryLevel || "-"}
                             %
                           </div>
                           <div
-                            className={`text-xs ${
-                              realTimeData.latestBP.data.deviceInfo
-                                ?.batteryLevel <= 20
-                                ? "text-red-600 dark:text-red-400"
-                                : "text-green-600 dark:text-green-400"
-                            }`}
+                            className={`text-xs ${realTimeData.latestBP.data.deviceInfo
+                              ?.batteryLevel <= 20
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-green-600 dark:text-green-400"
+                              }`}
                           >
                             Battery
                           </div>
@@ -2337,13 +2323,12 @@ const PatientModal = ({
 
                           return (
                             <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                                status === "normal"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                  : status === "high"
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${status === "normal"
+                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                : status === "high"
                                   ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
                                   : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                              }`}
+                                }`}
                             >
                               {statusText}
                             </span>
@@ -2371,7 +2356,7 @@ const PatientModal = ({
               <div className="bg-[#103c63] px-4 py-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-white text-center flex-1">
-                    SpO₂ Level
+                    SpO2 Level
                   </h3>
                 </div>
               </div>
@@ -2383,8 +2368,8 @@ const PatientModal = ({
                   <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
                     {realTimeData?.latestSpO2?.created_at
                       ? `Last: ${new Date(
-                          realTimeData.latestSpO2.created_at
-                        ).toLocaleString()}`
+                        realTimeData.latestSpO2.created_at
+                      ).toLocaleString()}`
                       : "No data available"}
                   </span>
                 </div>
@@ -2425,20 +2410,18 @@ const PatientModal = ({
                           </div>
                         </div>
                         <div
-                          className={`rounded-lg p-2 ${
-                            realTimeData.latestSpO2.data.deviceInfo
-                              ?.batteryLevel <= 20
-                              ? "bg-red-100 dark:bg-red-900/30"
-                              : "bg-green-50 dark:bg-green-900/20"
-                          }`}
+                          className={`rounded-lg p-2 ${realTimeData.latestSpO2.data.deviceInfo
+                            ?.batteryLevel <= 20
+                            ? "bg-red-100 dark:bg-red-900/30"
+                            : "bg-green-50 dark:bg-green-900/20"
+                            }`}
                         >
                           <div
-                            className={`text-lg font-bold ${
-                              realTimeData.latestSpO2.data.deviceInfo
-                                ?.batteryLevel <= 20
-                                ? "text-red-600 dark:text-red-400"
-                                : "text-green-600 dark:text-green-400"
-                            }`}
+                            className={`text-lg font-bold ${realTimeData.latestSpO2.data.deviceInfo
+                              ?.batteryLevel <= 20
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-green-600 dark:text-green-400"
+                              }`}
                           >
                             {realTimeData.latestSpO2.data.deviceInfo
                               ?.batteryLevel
@@ -2446,12 +2429,11 @@ const PatientModal = ({
                               : "-"}
                           </div>
                           <div
-                            className={`text-xs ${
-                              realTimeData.latestSpO2.data.deviceInfo
-                                ?.batteryLevel <= 20
-                                ? "text-red-600 dark:text-red-400"
-                                : "text-green-600 dark:text-green-400"
-                            }`}
+                            className={`text-xs ${realTimeData.latestSpO2.data.deviceInfo
+                              ?.batteryLevel <= 20
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-green-600 dark:text-green-400"
+                              }`}
                           >
                             Battery
                           </div>
@@ -2462,7 +2444,7 @@ const PatientModal = ({
                       <div className="grid grid-cols-2 gap-3 mb-4">
                         <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
                           <div className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-1">
-                            SpO₂ Range
+                            SpO2 Range
                           </div>
                           <div className="text-xs text-amber-600 dark:text-amber-400">
                             Min: {realTimeData.latestSpO2.data.minSpo2 || "-"}%
@@ -2531,13 +2513,12 @@ const PatientModal = ({
 
                           return (
                             <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                                status === "normal"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                  : status === "warning"
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${status === "normal"
+                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                : status === "warning"
                                   ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
                                   : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                              }`}
+                                }`}
                             >
                               {statusText}
                             </span>
@@ -2551,7 +2532,7 @@ const PatientModal = ({
                         No Data
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-600">
-                        SpO₂ reading not available
+                        SpO2 reading not available
                       </div>
                     </div>
                   )}
@@ -2665,7 +2646,7 @@ const PatientModal = ({
                 </div>
                 <span className="text-sm font-medium">View Data</span>
                 <span className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  SpO₂ Level
+                  SpO2 Level
                 </span>
               </button>
               <button
@@ -2678,7 +2659,7 @@ const PatientModal = ({
                 </div>
                 <span className="text-sm font-medium">View Graph</span>
                 <span className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  SpO₂ Level
+                  SpO2 Level
                 </span>
               </button>
             </div>

@@ -2,6 +2,7 @@
 
 // export default AdminUsers;
 import React, { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import {
   Users,
   Plus,
@@ -31,6 +32,56 @@ import ThemeToggle from "../components/ThemeToggle";
 import { useAuth } from "../context/AuthProvider";
 import { LogOut } from "lucide-react";
 import { useSocket } from "../context/SocketContext";
+
+const ViewPatientsModal = ({ isOpen, onClose, clinician }) => {
+  if (!isOpen || !clinician) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
+      <div className="bg-white dark:bg-innerDarkColor rounded-lg shadow-xl w-full max-w-md overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Assigned Patients: {clinician.name}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-4 max-h-[60vh] overflow-y-auto">
+          {clinician.assignedPatients && clinician.assignedPatients.length > 0 ? (
+            <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+              {clinician.assignedPatients.map((patient, index) => (
+                <li key={index} className="py-3 flex items-center">
+                  <div className="w-8 h-8 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 rounded-full flex items-center justify-center mr-3 text-sm font-medium">
+                    {patient.charAt(0)}
+                  </div>
+                  <span className="text-sm text-gray-700 dark:text-gray-200">
+                    {patient}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              No patients assigned to this clinician yet.
+            </div>
+          )}
+        </div>
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const API_BASE =
   import.meta.env.VITE_BACKEND_API || "http://localhost:4000";
@@ -816,6 +867,9 @@ const UsersManagementView = ({
                     Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                    Assignments
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-300">
                     Contact
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-300">
@@ -854,6 +908,28 @@ const UsersManagementView = ({
                       <div className="text-sm text-gray-900 dark:text-gray-100">
                         {user.role}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {user.role === "patient" ? (
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="font-medium">Clinician:</span>{" "}
+                          {user.assignedClinician || "None"}
+                        </div>
+                      ) : user.role === "clinician" ? (
+                        <button
+                          onClick={() => {
+                            setSelectedClinicianModal(user);
+                            setShowViewPatientsModal(true);
+                          }}
+                          className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-all shadow-sm active:scale-95"
+                        >
+                          {user.patientCount || 0} Patients
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
+                          -
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm mb-1 text-gray-900 dark:text-gray-100">
@@ -987,6 +1063,13 @@ const UsersManagementView = ({
 const AdminUsers = () => {
   const { auth } = useAuth();
   const { socket, isConnected, alerts } = useSocket();
+
+  if (!auth?.isAuthenticated && !auth?.loading) return <Navigate to="/" replace />;
+  if (auth?.isAuthenticated && auth?.user?.role && auth.user.role !== "admin") {
+    if (auth.user.role === "super-admin") return <Navigate to="/superAdmin" replace />;
+    if (auth.user.role === "patient") return <Navigate to="/patient-dashboard" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1003,6 +1086,8 @@ const AdminUsers = () => {
   const [activeView, setActiveView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showViewPatientsModal, setShowViewPatientsModal] = useState(false);
+  const [selectedClinicianModal, setSelectedClinicianModal] = useState(null);
 
   // WebSocket Alert States
   const [emergencyAlerts, setEmergencyAlerts] = useState([]);
@@ -1291,6 +1376,10 @@ const AdminUsers = () => {
                 .map((n) => n[0])
                 .join("")
             : "NA",
+          // Add assignment fields from backend or mock them for UI demonstration
+          patientCount: user.patient_count || 0,
+          assignedPatients: user.assigned_patients || [],
+          assignedClinician: user.assigned_clinician || null,
         }));
 
         setUsers(formattedUsers);
@@ -1451,6 +1540,17 @@ const AdminUsers = () => {
           }}
           user={selectedUser}
           onDelete={handleDeleteUser}
+        />
+      )}
+
+      {showViewPatientsModal && selectedClinicianModal && (
+        <ViewPatientsModal
+          isOpen={showViewPatientsModal}
+          onClose={() => {
+            setShowViewPatientsModal(false);
+            setSelectedClinicianModal(null);
+          }}
+          clinician={selectedClinicianModal}
         />
       )}
 

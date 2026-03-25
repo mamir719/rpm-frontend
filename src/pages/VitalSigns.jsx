@@ -463,16 +463,7 @@ const VitalSigns = ({ idProp }) => {
   };
 
   // PDF Export Functionality - Simple version without autoTable
-  const handleExport = async (
-    deviceType,
-    historicalData,
-    patientData,
-    queryMode,
-    dateRangeText,
-    fromDate,
-    toDate,
-    daysFilter
-  ) => {
+  const handleExport = async () => {
     if (
       !patientData ||
       !historicalData?.data ||
@@ -493,7 +484,7 @@ const VitalSigns = ({ idProp }) => {
 
       // Set document properties
       doc.setProperties({
-        title: `${deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Report - ${
+        title: `${deviceType === "bp" ? "Blood Pressure" : "SpO2"} Report - ${
           patientData.patient.name
         }`,
         subject: "Patient Vital Signs Report",
@@ -504,7 +495,7 @@ const VitalSigns = ({ idProp }) => {
       doc.setFontSize(16);
       doc.setTextColor(40, 40, 40);
       doc.text(
-        `${deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Monitoring Report`,
+        `${deviceType === "bp" ? "Blood Pressure" : "SpO2"} Monitoring Report`,
         105,
         20,
         { align: "center" }
@@ -551,7 +542,7 @@ const VitalSigns = ({ idProp }) => {
       } else {
         columns = [
           { header: "Date & Time", width: 50, key: "datetime" }, // Increased from 38 to 50
-          { header: "SpO₂", width: 16, key: "spo2" }, // Reduced from 18 to 16
+          { header: "SpO2", width: 16, key: "spo2" }, // Reduced from 18 to 16
           { header: "Pulse", width: 16, key: "pulse" }, // Reduced from 18 to 16
           { header: "PI", width: 12, key: "pi" }, // Reduced from 15 to 12
           { header: "Status", width: 20, key: "status" }, // Reduced from 22 to 20
@@ -764,9 +755,9 @@ const VitalSigns = ({ idProp }) => {
           });
         } else {
           const stats = [
-            `Average SpO₂: ${historicalData.statistics.averageSpo2 || "--"}%`,
-            `Highest SpO₂: ${historicalData.statistics.highestSpo2 || "--"}%`,
-            `Lowest SpO₂: ${historicalData.statistics.lowestSpo2 || "--"}%`,
+            `Average SpO2: ${historicalData.statistics.averageSpo2 || "--"}%`,
+            `Highest SpO2: ${historicalData.statistics.highestSpo2 || "--"}%`,
+            `Lowest SpO2: ${historicalData.statistics.lowestSpo2 || "--"}%`,
             `Average Pulse: ${
               historicalData.statistics.averagePulse || "--"
             } bpm`,
@@ -1308,7 +1299,7 @@ const VitalSigns = ({ idProp }) => {
       <div className="bg-white dark:bg-innerDarkColor rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-medium text-primary dark:text-darkModeText">
-            SpO₂ Readings
+            SpO2 Readings
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             {historicalData?.pagination
@@ -1322,7 +1313,7 @@ const VitalSigns = ({ idProp }) => {
           {historicalLoading ? (
             <div className="flex justify-center py-8">
               <div className="text-lg text-gray-600 dark:text-gray-400">
-                Loading SpO₂ data...
+                Loading SpO2 data...
               </div>
             </div>
           ) : historicalData?.data && historicalData.data.length > 0 ? (
@@ -1335,7 +1326,7 @@ const VitalSigns = ({ idProp }) => {
                         Date & Time
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        SpO₂
+                        SpO2
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">
                         Pulse
@@ -1461,7 +1452,7 @@ const VitalSigns = ({ idProp }) => {
             </>
           ) : (
             <div className="text-center py-8 text-gray-600 dark:text-gray-400">
-              No SpO₂ data found for the selected period.
+              No SpO2 data found for the selected period.
             </div>
           )}
         </div>
@@ -1479,7 +1470,7 @@ const VitalSigns = ({ idProp }) => {
           <div className="bg-white dark:bg-innerDarkColor rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-medium text-primary dark:text-darkModeText">
-                {deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Statistics (
+                {deviceType === "bp" ? "Blood Pressure" : "SpO2"} Statistics (
                 {daysFilter} Days)
               </h3>
             </div>
@@ -1538,7 +1529,7 @@ const VitalSigns = ({ idProp }) => {
                         {historicalData.statistics.averageSpo2}%
                       </div>
                       <div className="text-sm text-blue-600 dark:text-blue-400">
-                        Average SpO₂
+                        Average SpO2
                       </div>
                     </div>
                     <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
@@ -1546,7 +1537,7 @@ const VitalSigns = ({ idProp }) => {
                         {historicalData.statistics.highestSpo2}%
                       </div>
                       <div className="text-sm text-red-600 dark:text-red-400">
-                        Highest SpO₂
+                        Highest SpO2
                       </div>
                     </div>
                     <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -1554,7 +1545,7 @@ const VitalSigns = ({ idProp }) => {
                         {historicalData.statistics.lowestSpo2}%
                       </div>
                       <div className="text-sm text-green-600 dark:text-green-400">
-                        Lowest SpO₂
+                        Lowest SpO2
                       </div>
                     </div>
                     <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
@@ -1586,7 +1577,7 @@ const VitalSigns = ({ idProp }) => {
           <div className="bg-white dark:bg-innerDarkColor rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-medium text-primary dark:text-darkModeText">
-                {deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Trends
+                {deviceType === "bp" ? "Blood Pressure" : "SpO2"} Trends
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Showing {historicalData.data.length} readings from the last{" "}
@@ -1610,7 +1601,7 @@ const VitalSigns = ({ idProp }) => {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <h2 className="text-2xl font-bold text-primary dark:text-white">
-          {deviceType === "bp" ? "Blood Pressure" : "SpO₂"} Monitoring -{" "}
+          {deviceType === "bp" ? "Blood Pressure" : "SpO2"} Monitoring -{" "}
           {patient?.name || "Unknown Patient"}
         </h2>
         <div className="flex items-center space-x-4 mt-4 lg:mt-0">

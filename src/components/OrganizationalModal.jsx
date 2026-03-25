@@ -21,6 +21,12 @@ const AddOrganizationModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.admin.phone && !formData.admin.phone.startsWith("+92")) {
+      toast.error("Phone number must start with +92");
+      return;
+    }
+
     setLoading(true);
 
     // Map frontend -> backend fields

@@ -22,9 +22,9 @@ const PrivacyPolicy = () => {
               1. Introduction
             </h2>
             <p className="mb-4">
-              Twenty Two Health LLC, doing business as 22 RPM ("22 RPM," "we,"
+              Twenty Two Health LLC, doing business as Vita RPM ("Vita RPM," "we,"
               "our," or "us"), owns and operates the website
-              www.twentytwohealth.com ("the Site"). We also develop software
+              https://vitarpm.codexterlabs.com/ ("the Site"). We also develop software
               platforms and mobile applications for remote patient monitoring.
               This Website Privacy Policy describes how we collect, use, share,
               and protect personal information collected through the website
@@ -73,7 +73,7 @@ const PrivacyPolicy = () => {
               </ul>
               <p>
                 This information is used to respond to your inquiries, schedule
-                product demos, or communicate about 22 RPM services.
+                product demos, or communicate about Vita RPM services.
               </p>
             </div>
 
@@ -234,7 +234,7 @@ const PrivacyPolicy = () => {
                 C. Business Transfers
               </h3>
               <p>
-                If 22 RPM is acquired, merges, or undergoes reorganization,
+                If Vita RPM is acquired, merges, or undergoes reorganization,
                 website information may be transferred as part of that
                 transition.
               </p>
@@ -254,7 +254,7 @@ const PrivacyPolicy = () => {
             </h2>
             <p>
               The Site may contain links to third-party sites that are not owned
-              or controlled by 22 RPM. We are not responsible for the privacy
+              or controlled by Vita RPM. We are not responsible for the privacy
               practices of external websites. We encourage you to review the
               privacy policies of any site you visit.
             </p>
@@ -389,11 +389,11 @@ const PrivacyPolicy = () => {
             </p>
             <div className="bg-white p-6 rounded-lg border border-gray-200">
               <p className="font-semibold text-lg mb-2">
-                Twenty Two Health LLC (22 RPM)
+                vitarpm LLC (Vita RPM)
               </p>
-              <p className="mb-1">25420 Pyramid Peak Dr</p>
-              <p className="mb-1">Santa Clarita, CA 91350</p>
-              <p className="font-semibold">Email: info@twentytwohealth.com</p>
+              {/* <p className="mb-1">25420 Pyramid Peak Dr</p> */}
+              {/* <p className="mb-1">Santa Clarita, CA 91350</p> */}
+              <p className="font-semibold">Email: https://codexterlabs.com/</p>
             </div>
           </section>
         </div>

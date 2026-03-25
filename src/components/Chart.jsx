@@ -121,7 +121,7 @@ const BPChart = ({ data, deviceType = "bp" }) => {
           ) : (
             <>
               <p className="text-sm text-purple-600 dark:text-purple-400">
-                SpO₂: <strong>{data.spo2}%</strong>
+                SpO2: <strong>{data.spo2}%</strong>
               </p>
               {data.pulse && (
                 <p className="text-sm text-green-600 dark:text-green-400">
@@ -154,7 +154,7 @@ const BPChart = ({ data, deviceType = "bp" }) => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-500 dark:text-gray-400">
-          No {deviceType === "bp" ? "blood pressure" : "SpO₂"} data available
+          No {deviceType === "bp" ? "blood pressure" : "SpO2"} data available
           for chart
         </div>
       </div>
@@ -183,7 +183,7 @@ const BPChart = ({ data, deviceType = "bp" }) => {
             fontSize={12}
             domain={deviceType === "bp" ? [60, 180] : [80, 100]}
             label={{
-              value: deviceType === "bp" ? "mmHg" : "SpO₂ %",
+              value: deviceType === "bp" ? "mmHg" : "SpO2 %",
               angle: -90,
               position: "insideLeft",
             }}
@@ -221,7 +221,7 @@ const BPChart = ({ data, deviceType = "bp" }) => {
                 strokeWidth={2}
                 dot={{ r: 3 }}
                 activeDot={{ r: 6 }}
-                name="SpO₂ (%)"
+                name="SpO2 (%)"
               />
               <Line
                 type="monotone"

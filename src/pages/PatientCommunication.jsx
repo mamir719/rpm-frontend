@@ -398,7 +398,7 @@
 
 // export default ChatInterface;
 // PatientCommunication.jsx - UPDATED
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { AuthContext } from "../context/AuthProvider";
 import { useSocket } from "../context/SocketContext";
 
@@ -414,6 +414,7 @@ const ChatInterface = () => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [activeTab, setActiveTab] = useState("conversations");
   const [loadingPatients, setLoadingPatients] = useState(false);
+  const messagesEndRef = useRef(null);
 
   const API_BASE = import.meta.env.VITE_BACKEND_API || "http://localhost:4000";
 
@@ -480,6 +481,15 @@ const ChatInterface = () => {
       };
     }
   }, [socket, auth, authUser, selectedUser]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   // Search functionality for both conversations and patients
   useEffect(() => {
@@ -736,7 +746,7 @@ const ChatInterface = () => {
         Patient Communication
       </h2>
 
-      <div className="flex h-[90vh] bg-white dark:bg-innerDarkColor rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="flex h-[calc(100vh-8rem)] bg-white dark:bg-innerDarkColor rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex space-x-4 mb-3">
@@ -991,6 +1001,7 @@ const ChatInterface = () => {
                       );
                     })
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
               </div>
 

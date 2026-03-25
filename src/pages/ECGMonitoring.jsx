@@ -230,7 +230,7 @@ const ECGWaveform = () => {
                 98%
               </div>
               <div className="text-gray-400 dark:text-gray-500 text-xs">
-                SpO₂
+                SpO2
               </div>
             </div>
             <div

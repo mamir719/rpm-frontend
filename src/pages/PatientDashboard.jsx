@@ -447,7 +447,7 @@ const PatientDashboard = () => {
 
           <div className="space-y-3 mt-auto">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500 dark:text-gray-400">SpO₂ Pulse</span>
+              <span className="text-gray-500 dark:text-gray-400">SpO2 Pulse</span>
               <span className="font-semibold text-gray-900 dark:text-white">
                 {spo2Pulse ? `${Math.round(spo2Pulse)} bpm` : "--"}
               </span>
@@ -513,7 +513,7 @@ const PatientDashboard = () => {
             {latestSpo2Record && (
               <div className={`p-4 rounded-lg border flex flex-col gap-2 ${statusBg(spo2Status)}`}>
                 <div className="flex justify-between items-start">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-tight">SpO₂ Reading</span>
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-tight">SpO2 Reading</span>
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${statusBg(spo2Status).replace("bg-", "text-").replace("-50", "-700")} bg-white/50`}>
                     {spo2Status}
                   </span>
@@ -580,7 +580,7 @@ const PatientDashboard = () => {
               <Activity className="w-5 h-5 text-teal-600 dark:text-teal-400" />
               <div className="text-left">
                 <p className="text-sm font-medium text-gray-800 dark:text-white">
-                  SpO₂ History
+                  SpO2 History
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Detailed oxygen level trends
